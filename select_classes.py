@@ -43,6 +43,14 @@ def select_classes_baseline(one_hot,n,selection_strategy="top_n"):
             seen.append(ind[-1*i])
         seen.sort()
         return seen
+    elif  (selection_strategy=="top_n_baseline"):
+        col_sum=one_hot.sum(axis=0)
+        ind = np.argpartition(col_sum, -1*n)
+        seen = []
+        for i in range(1,n+1):
+            seen.append(ind[0,-1*i])
+        seen.sort()
+        return seen
     else:
         print("Error! This selection strategy is not defined.")
 
