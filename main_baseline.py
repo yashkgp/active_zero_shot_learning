@@ -24,19 +24,17 @@ from Logreg import logreg_model
 from RBM1 import train_RBM_and_compute_simiarity
 from evaluate import compute_unseen_class_scores, compute_precision
 from scipy import sparse
+from sklearn.model_selection import train_test_split
 import numpy as np
 import os
 
 
-y_train = sparse.load_npz(data_dir+'tags_one_hot_train.npz')
-y_train = y_train.todense()
-y_test = sparse.load_npz(data_dir+'tags_one_hot_test.npz')
-y_test = y_test.todense()
+y_data = sparse.load_npz(data_dir+'tags_one_hot_sparse.npz')
+y_data = y_data.todense()
 
-y_data = np.concatenate((y_train,y_test),axis=0)
 
-X_train = sparse.load_npz(data_dir+'tfifdf_transformed_train.npz')
-X_test = sparse.load_npz(data_dir+'tfifdf_transformed_test.npz')
+X_data = sparse.load_npz(data_dir+'tfifdf_transformed.npz')
+X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.20, random_state=42)
 
 if os.path.exists(data_dir + 'similarity_matrix.npy'):
 	similarity_matrix = np.load(data_dir + 'similarity_matrix.npy')
@@ -52,7 +50,7 @@ plot_y_deg = []
 modes = ['top_n']
 
 for mode in modes:
-	for num_seen_classes in range(start_seen_classes, end_seen_classes, 5):
+	for num_seen_classes in range(start_seen_classes, end_seen_classes, 1):
 
 		selected_classes = select_classes_baseline(similarity_matrix, num_seen_classes, mode)
 
