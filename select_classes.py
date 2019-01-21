@@ -60,3 +60,4 @@ if __name__ == "__main__":
 
     K = np.asarray([[0,1,1], [1,0,1], [1,1,1]])
     print(select_classes(K, 2, 'max-ent-uu'))
+
