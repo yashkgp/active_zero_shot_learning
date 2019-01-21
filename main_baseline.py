@@ -19,7 +19,7 @@ end_seen_classes = int(options.end_seen_classes)
 plot_file_name = options.plot_file_name
 
 
-from select_classes import select_classes_baseline
+from select_classes import select_classes_baseline,select_classes
 from Logreg import logreg_model
 from RBM1 import train_RBM_and_compute_simiarity
 from evaluate import compute_unseen_class_scores, compute_precision
@@ -47,13 +47,20 @@ plot_y_ent = []
 plot_x_deg = []
 plot_y_deg = []
 
-modes = ['top_n']
+plot_x_base = []
+plot_y_base = []
+
+modes = ['top_n','max-ent-uu','top_n_baseline']
 
 for mode in modes:
 	for num_seen_classes in range(start_seen_classes, end_seen_classes, 1):
 
-		selected_classes = select_classes_baseline(similarity_matrix, num_seen_classes, mode)
-
+		if(mode=='top_n'):
+			selected_classes = select_classes_baseline(similarity_matrix, num_seen_classes, mode)
+		elif(mode=='top_n_baseline'):
+			selected_classes = select_classes_baseline(y_data, num_seen_classes, mode)	
+		else :
+			selected_classes = select_classes(similarity_matrix, num_seen_classes, mode)
 		to_remove = []
 
 		for class_idx in selected_classes:
@@ -82,22 +89,30 @@ for mode in modes:
 		if mode == 'max-ent-uu':
 			plot_x_ent.append(num_seen_classes)
 			plot_y_ent.append(precision)
-		else:
+		elif mode == 'top_n':
 			plot_x_deg.append(num_seen_classes)
 			plot_y_deg.append(precision)
+		else:
+			plot_x_base.append(num_seen_classes)
+			plot_y_base.append(precision)
 
 plot_x_ent = np.array(plot_x_ent)
 plot_y_ent = np.array(plot_y_ent)
 plot_x_deg = np.array(plot_x_deg)
 plot_y_deg = np.array(plot_y_deg)
+plot_x_base = np.array(plot_x_base)
+plot_y_base = np.array(plot_y_base)
 
 np.save(plot_file_name+"_x_ent.list",plot_x_ent)
 np.save(plot_file_name+"_y_ent.list",plot_y_ent)
 np.save(plot_file_name+"_x_deg.list",plot_x_deg)
 np.save(plot_file_name+"_y_deg.list",plot_y_deg)
+np.save(plot_file_name+"_x_base.list",plot_x_base )
+np.save(plot_file_name+"_y_base.list",plot_y_base)
 
 plt.plot(plot_x_ent,plot_y_ent,color='red')
 plt.plot(plot_x_deg,plot_y_deg,color='blue')
+plt.plot(plot_x_base,plot_y_base,color='green')
 plt.xlabel('Number of Seen Classes')
 plt.ylabel('Precision @ 5')
 plt.legend(loc='best')
