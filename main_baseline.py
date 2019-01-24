@@ -49,71 +49,74 @@ plot_y_deg = []
 
 plot_x_base = []
 plot_y_base = []
+res = open("results.txt",'w')
+cents= ['eigen_vector_max','eigen_vector_min','betweeness_max','betweeness_min','harmoninc_max','harmoninc_min','closeness_max','closeness_min','information_max','information_min','current_flow_closeness_max','current_flow_closeness_min','load_max','load_min','pagerank_max','pagerank_min']
+for i in cents:
+	modes = [i,'max-ent-uu','top_n_baseline']
 
-modes = ['top_n','max-ent-uu','top_n_baseline']
+	for mode in modes:
+		for num_seen_classes in range(start_seen_classes, end_seen_classes, 1):
 
-for mode in modes:
-	for num_seen_classes in range(start_seen_classes, end_seen_classes, 5):
+			if(mode=='top_n'):
+				selected_classes = select_classes_baseline(similarity_matrix, num_seen_classes, mode)
+			elif(mode=='top_n_baseline'):
+				selected_classes = select_classes_baseline(y_data, num_seen_classes, mode)	
+			else :
+				selected_classes = select_classes(similarity_matrix, num_seen_classes, mode)
+			to_remove = []
 
-		if(mode=='top_n'):
-			selected_classes = select_classes_baseline(similarity_matrix, num_seen_classes, mode)
-		elif(mode=='top_n_baseline'):
-			selected_classes = select_classes_baseline(y_data, num_seen_classes, mode)	
-		else :
-			selected_classes = select_classes(similarity_matrix, num_seen_classes, mode)
-		to_remove = []
+			for class_idx in selected_classes:
+				if np.sum(y_train[:, class_idx] < 0.5) < 5 or np.sum(y_train[:, class_idx] > 0.5) < 5:
+					to_remove.append(class_idx)
 
-		for class_idx in selected_classes:
-			if np.sum(y_train[:, class_idx] < 0.5) < 5 or np.sum(y_train[:, class_idx] > 0.5) < 5:
-				to_remove.append(class_idx)
+			for class_idx in to_remove:
+				selected_classes.remove(class_idx)
 
-		for class_idx in to_remove:
-			selected_classes.remove(class_idx)
+			models = logreg_model(X_train,selected_classes,y_train)
 
-		models = logreg_model(X_train,selected_classes,y_train)
+			y_pred  = np.zeros((y_test.shape[0],len(selected_classes)))
 
-		y_pred  = np.zeros((y_test.shape[0],len(selected_classes)))
+			i = 0
+			for key in selected_classes:
+				model = models[key]
+				y_pred[:,i] = model.predict_proba(X_test)[:,1]
+				i += 1
 
-		i = 0
-		for key in selected_classes:
-			model = models[key]
-			y_pred[:,i] = model.predict_proba(X_test)[:,1]
-			i += 1
+			unseen_classes = list(set(range(y_data.shape[1])) - set(selected_classes))
+			score_unseen = compute_unseen_class_scores(y_pred,similarity_matrix,selected_classes,unseen_classes)
 
-		unseen_classes = list(set(range(y_data.shape[1])) - set(selected_classes))
-		score_unseen = compute_unseen_class_scores(y_pred,similarity_matrix,selected_classes,unseen_classes)
+			precision = compute_precision(y_test[:,unseen_classes],score_unseen)
+			res.write(str(precision)+'	')
+			res.write(mode +"     "+str(num_seen_classes)+'\n')
+			print("%.6f" % (precision), num_seen_classes)
+			if mode == 'max-ent-uu':
+				plot_x_ent.append(num_seen_classes)
+				plot_y_ent.append(precision)
+			elif mode == 'top_n_baseline':
+				plot_x_deg.append(num_seen_classes)
+				plot_y_deg.append(precision)
+			else:
+				plot_x_base.append(num_seen_classes)
+				plot_y_base.append(precision)
 
-		precision = compute_precision(y_test[:,unseen_classes],score_unseen)
+	plot_x_ent = np.array(plot_x_ent)
+	plot_y_ent = np.array(plot_y_ent)
+	plot_x_deg = np.array(plot_x_deg)
+	plot_y_deg = np.array(plot_y_deg)
+	plot_x_base = np.array(plot_x_base)
+	plot_y_base = np.array(plot_y_base)
 
-		print("%.6f" % (precision), num_seen_classes)
-		if mode == 'max-ent-uu':
-			plot_x_ent.append(num_seen_classes)
-			plot_y_ent.append(precision)
-		elif mode == 'top_n':
-			plot_x_deg.append(num_seen_classes)
-			plot_y_deg.append(precision)
-		else:
-			plot_x_base.append(num_seen_classes)
-			plot_y_base.append(precision)
+	np.save(plot_file_name+"_x_ent.list",plot_x_ent)
+	np.save(plot_file_name+"_y_ent.list",plot_y_ent)
+	np.save(plot_file_name+"_x_deg.list",plot_x_deg)
+	np.save(plot_file_name+"_y_deg.list",plot_y_deg)
+	np.save(plot_file_name+"_x_base.list",plot_x_base )
+	np.save(plot_file_name+"_y_base.list",plot_y_base)
 
-plot_x_ent = np.array(plot_x_ent)
-plot_y_ent = np.array(plot_y_ent)
-plot_x_deg = np.array(plot_x_deg)
-plot_y_deg = np.array(plot_y_deg)
-plot_x_base = np.array(plot_x_base)
-plot_y_base = np.array(plot_y_base)
-
-np.save(plot_file_name+"_x_ent.list",plot_x_ent)
-np.save(plot_file_name+"_y_ent.list",plot_y_ent)
-np.save(plot_file_name+"_x_deg.list",plot_x_deg)
-np.save(plot_file_name+"_y_deg.list",plot_y_deg)
-np.save(plot_file_name+"_x_base.list",plot_x_base )
-np.save(plot_file_name+"_y_base.list",plot_y_base)
-
-plt.plot(plot_x_ent,plot_y_ent,color='red')
-plt.plot(plot_x_deg,plot_y_deg,color='blue')
-plt.plot(plot_x_base,plot_y_base,color='green')
-plt.xlabel('Number of Seen Classes')
-plt.ylabel('Precision @ 5')
-plt.legend(loc='best')
-plt.savefig(plot_file_name+".png")
+	plt.plot(plot_x_ent,plot_y_ent,color='red')
+	plt.plot(plot_x_deg,plot_y_deg,color='blue')
+	plt.plot(plot_x_base,plot_y_base,color='green')
+	plt.xlabel('Number of Seen Classes')
+	plt.ylabel('Precision @ 5')
+	plt.legend(loc='best')
+	plt.savefig(i+"acc.png")
