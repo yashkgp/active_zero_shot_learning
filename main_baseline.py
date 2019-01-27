@@ -41,21 +41,20 @@ if os.path.exists(data_dir + 'similarity_matrix.npy'):
 else:
 	similarity_matrix = train_RBM_and_compute_simiarity(y_data,target_filename=data_dir + 'similarity_matrix.npy')
 
-plot_x_ent = []
-plot_y_ent = []
-
-plot_x_deg = []
-plot_y_deg = []
-
-plot_x_base = []
-plot_y_base = []
 res = open("results.txt",'w')
-cents= ['eigen_vector_max','eigen_vector_min','betweeness_max','betweeness_min','harmoninc_max','harmoninc_min','closeness_max','closeness_min','information_max','information_min','current_flow_closeness_max','current_flow_closeness_min','load_max','load_min','pagerank_max','pagerank_min']
-for i in cents:
-	modes = [i,'max-ent-uu','top_n_baseline']
+cents= ['eigen_vector_max','eigen_vector_min','betweeness_max','betweeness_min','harmoninc_max','harmoninc_min','closeness_max','closeness_min','information_max','information_min','current_flow_closeness_max','current_flow_closeness_min','load_max','load_min','pagerank_max','pagerank_min','max-ent-uu','top_n_baseline']
+for itemp in cents:
+	modes = [itemp,'top_n_baseline']
+	plot_x_ent = []
+	plot_y_ent = []
 
+	plot_x_deg = []
+	plot_y_deg = []
+
+	plot_x_base = []
+	plot_y_base = []
 	for mode in modes:
-		for num_seen_classes in range(start_seen_classes, end_seen_classes, 1):
+		for num_seen_classes in range(start_seen_classes, end_seen_classes, 5):
 
 			if(mode=='top_n'):
 				selected_classes = select_classes_baseline(similarity_matrix, num_seen_classes, mode)
@@ -64,6 +63,7 @@ for i in cents:
 			else :
 				selected_classes = select_classes(similarity_matrix, num_seen_classes, mode)
 			to_remove = []
+			print (selected_classes)
 
 			for class_idx in selected_classes:
 				if np.sum(y_train[:, class_idx] < 0.5) < 5 or np.sum(y_train[:, class_idx] > 0.5) < 5:
@@ -119,4 +119,5 @@ for i in cents:
 	plt.xlabel('Number of Seen Classes')
 	plt.ylabel('Precision @ 5')
 	plt.legend(loc='best')
-	plt.savefig(i+"acc.png")
+	plt.savefig(str(itemp)+"acc.png")
+res.close()
