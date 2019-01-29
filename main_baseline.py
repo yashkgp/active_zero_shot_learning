@@ -4,6 +4,8 @@ import pickle
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+import multiprocessing
+
 
 parser = OptionParser()
 parser.add_option("--data_dir", dest="data_dir")
@@ -28,26 +30,9 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import os
 
-
-y_data = sparse.load_npz(data_dir+'tags_one_hot_sparse.npz')
-y_data = y_data.todense()
-
-
-X_data = sparse.load_npz(data_dir+'tfifdf_transformed.npz')
-X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.20, random_state=42)
-
-if os.path.exists(data_dir + 'similarity_matrix.npy'):
-	similarity_matrix = np.load(data_dir + 'similarity_matrix.npy')
-else:
-	similarity_matrix = train_RBM_and_compute_simiarity(y_data,target_filename=data_dir + 'similarity_matrix.npy')
-
-res = open("results.txt",'w')
-cents= ['eigen_vector_max','eigen_vector_min','betweeness_max','betweeness_min','harmoninc_max','harmoninc_min','closeness_max','closeness_min','information_max','information_min','current_flow_closeness_max','current_flow_closeness_min','load_max','load_min','pagerank_max','pagerank_min','max-ent-uu','top_n_baseline']
-for itemp in cents:
-	modes = [itemp,'top_n_baseline']
+def multiprocessing_fn(modes,res):
 	plot_x_ent = []
 	plot_y_ent = []
-
 	plot_x_deg = []
 	plot_y_deg = []
 
@@ -119,5 +104,30 @@ for itemp in cents:
 	plt.xlabel('Number of Seen Classes')
 	plt.ylabel('Precision @ 5')
 	plt.legend(loc='best')
-	plt.savefig(str(itemp)+"acc.png")
+	plt.savefig(itemp+"acc.png")
+
+y_data = sparse.load_npz(data_dir+'tags_one_hot_sparse.npz')
+y_data = y_data.todense()
+
+
+X_data = sparse.load_npz(data_dir+'tfifdf_transformed.npz')
+X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.20, random_state=42)
+
+if os.path.exists(data_dir + 'similarity_matrix.npy'):
+	similarity_matrix = np.load(data_dir + 'similarity_matrix.npy')
+else:
+	similarity_matrix = train_RBM_and_compute_simiarity(y_data,target_filename=data_dir + 'similarity_matrix.npy')
+
+processes = []
+res = open("results.txt",'w')
+cents= ['betweeness_max','betweeness_min','harmoninc_max','harmoninc_min','closeness_max','closeness_min','information_max','information_min','current_flow_closeness_max','current_flow_closeness_min','load_max','load_min','pagerank_max','pagerank_min']
+for itemp in cents:
+	modes = [itemp]
+	p = multiprocessing.Process(target=multiprocessing_fn, args=(modes,res,))
+	processes.append(p)
+	p.start()
+        
+for process in processes:
+    process.join()
+
 res.close()
