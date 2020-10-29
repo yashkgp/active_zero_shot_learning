@@ -38,10 +38,17 @@ The code reads the data and then creates a similarity_matrix using the boltzman 
 ## Requirements - 
 
 Python 3 (3.6)
+
 Pickle
+
 Numpy
+
 Scipy
+
 xml
+
 Beautiful Soup
+
 json
+
 matplotlib
