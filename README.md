@@ -1,17 +1,20 @@
 ## Download Datset
 Dataset Link - https://archive.org/download/stackexchange
-Data files to download- 
-	1. Dba - dba.stackexchange.com.7z
-	2. Unix - unix.stackexchange.com.7z
+
+Data files to download:
+- Dba - dba.stackexchange.com.7z
+- Unix - unix.stackexchange.com.7z
 
 Extract only the files Tags.xml and Posts.xml .
+
 Put the two files of each of the 2 subsystems in the following data folders - data/dbaData and data/unixData respectively.
 
 
 ## PreProcessing - 
 Run `python prepare_data.py `
 
-to perform pre-processing over the data files and generate the required files for the experiment. You will need to change the parameter DATA_DIR in prepare_data.py to either data/dbaData or data/unixData depending the subsystem you are working with. The output is generated in data/dbaData/output or data/unixData/output respectively.
+to perform pre-processing over the data files and generate the required files for the experiment. You will need to change the parameter `DATA_DIR` in prepare_data.py to either data/dbaData or data/unixData depending the subsystem you are working wi
+th. The output is generated in data/dbaData/output or data/unixData/output respectively.
 
 
 
