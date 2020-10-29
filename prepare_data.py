@@ -5,7 +5,7 @@ import json
 from sklearn.feature_extraction.text import TfidfTransformer
 from scipy import sparse
 
-DATA_DIR = 'data/unix/'
+DATA_DIR = 'data/superuser/'
 OUTPUT_DIR = "output/"
 if not os.path.exists(DATA_DIR+OUTPUT_DIR):
     os.mkdir(DATA_DIR+OUTPUT_DIR)
@@ -14,11 +14,10 @@ POSTS_FILE = 'Posts.xml'
 
 #HyperParameters
 MIN_TAGS_COUNT = 10
-MAX_QUES = 24000
-MIN_COUNT = 15
+MAX_QUES = 50000
+MIN_COUNT = 25
 
 dp = DataParser()
-
 #Prepare Tags List
 dp.get_tags(DATA_DIR+TAGS_FILE,min_ct=MIN_TAGS_COUNT,target_filename=DATA_DIR+OUTPUT_DIR+"tags_json.json")
 

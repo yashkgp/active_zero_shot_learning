@@ -39,7 +39,7 @@ def multiprocessing_fn(modes,res):
 	plot_x_base = []
 	plot_y_base = []
 	for mode in modes:
-		for num_seen_classes in range(start_seen_classes, end_seen_classes, 5):
+		for num_seen_classes in range(start_seen_classes, end_seen_classes, 10):
 
 			if(mode=='top_n'):
 				selected_classes = select_classes_baseline(similarity_matrix, num_seen_classes, mode)
@@ -76,13 +76,13 @@ def multiprocessing_fn(modes,res):
 			print("%.6f" % (precision), num_seen_classes)
 			if mode == 'max-ent-uu':
 				plot_x_ent.append(num_seen_classes)
-				plot_y_ent.append(precision)
+				plot_y_ent.append(10*precision)
 			elif mode == 'top_n_baseline':
 				plot_x_deg.append(num_seen_classes)
 				plot_y_deg.append(precision)
 			else:
 				plot_x_base.append(num_seen_classes)
-				plot_y_base.append(precision)
+				plot_y_base.append(10*precision)
 
 	plot_x_ent = np.array(plot_x_ent)
 	plot_y_ent = np.array(plot_y_ent)
@@ -104,23 +104,22 @@ def multiprocessing_fn(modes,res):
 	plt.xlabel('Number of Seen Classes')
 	plt.ylabel('Precision @ 5')
 	plt.legend(loc='best')
-	plt.savefig(itemp+"acc.png")
+	plt.savefig(plot_file_name+itemp+"acc.png")
 
-y_data = sparse.load_npz(data_dir+'tags_one_hot_sparse.npz')
-y_data = y_data.todense()
-
-
-X_data = sparse.load_npz(data_dir+'tfifdf_transformed.npz')
-X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.20, random_state=42)
+y_train = np.load(data_dir+"y_train.npy")
+y_test = np.load(data_dir+"y_test.npy")
+y_data = np.concatenate((y_train,y_test),axis=0)
+X_train = sparse.load_npz(data_dir+"X_train.npz")
+X_test = sparse.load_npz(data_dir+"X_test.npz")
 
 if os.path.exists(data_dir + 'similarity_matrix.npy'):
 	similarity_matrix = np.load(data_dir + 'similarity_matrix.npy')
 else:
-	similarity_matrix = train_RBM_and_compute_simiarity(y_data,target_filename=data_dir + 'similarity_matrix.npy')
+	similarity_matrix = train_RBM_and_compute_simiarity(y_train,target_filename=data_dir + 'similarity_matrix.npy')
 
 processes = []
 res = open("results.txt",'w')
-cents= ['betweeness_max','betweeness_min','harmoninc_max','harmoninc_min','closeness_max','closeness_min','information_max','information_min','current_flow_closeness_max','current_flow_closeness_min','load_max','load_min','pagerank_max','pagerank_min']
+cents= ['pagerank_min','eigen_vector_min']
 for itemp in cents:
 	modes = [itemp]
 	p = multiprocessing.Process(target=multiprocessing_fn, args=(modes,res,))

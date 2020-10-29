@@ -1,8 +1,15 @@
 import numpy as np
 import networkx as nx
-
+"""
+Script to select the classes in the Active Learning algorithm
+This method uses different strategies....
+"""
 def select_classes(K, n, selection_strategy):
     if selection_strategy == 'max-deg-uu':
+        '''
+        selects the max degree node(class) from the set of 
+        unseen classes
+        '''
         n_classes = K.shape[0]
         seen = []
         unseen = list(range(n_classes))
@@ -18,13 +25,18 @@ def select_classes(K, n, selection_strategy):
         return seen
 
     elif selection_strategy == 'max-ent-uu':
+        '''
+        max-ent based unseen class selection as
+        in the baseline paper
+        '''
         n_classes = K.shape[0]
         seen = []
         unseen = list(range(n_classes))
         
         while len(seen) < n:
             K_UU = K[unseen, :][:, unseen]
-            P_UU = np.matmul( np.linalg.inv(np.diag(np.matmul(np.ones((1, K_UU.shape[0])), K_UU).flatten())), K_UU)
+            P_UU = np.matmul( np.linalg.inv(np.diag(\
+            np.matmul(np.ones((1, K_UU.shape[0])), K_UU).flatten())), K_UU)
             max_entropy_node = np.argmax(-np.sum(P_UU*np.log(P_UU) , 1))
             max_entropy_node = unseen[max_entropy_node]
             seen.append(max_entropy_node)
@@ -32,7 +44,14 @@ def select_classes(K, n, selection_strategy):
         
         seen.sort()
         return seen
+
+        
     elif selection_strategy=='eigen_vector_max':
+        '''
+        selects unseen classes with the max
+        eigen values
+        EigenVector Centrality
+        '''
         n_classes = K.shape[0]
         seen = []
         unseen = list(range(n_classes))
@@ -48,6 +67,10 @@ def select_classes(K, n, selection_strategy):
         seen.sort()
         return seen
     elif selection_strategy=='eigen_vector_min':
+        '''
+        min eigen vector
+        (not required)
+        '''
         n_classes = K.shape[0]
         seen = []
         unseen = list(range(n_classes))
@@ -62,6 +85,8 @@ def select_classes(K, n, selection_strategy):
         
         seen.sort()
         return seen
+
+    ######## betweenness centrality#####################
     elif selection_strategy=='betweeness_max':
         n_classes = K.shape[0]
         seen = []
@@ -92,6 +117,9 @@ def select_classes(K, n, selection_strategy):
         
         seen.sort()
         return seen
+    #################################################
+
+    ############harmonic centrality################
     elif selection_strategy=='harmoninc_max':
         n_classes = K.shape[0]
         seen = []
@@ -122,6 +150,10 @@ def select_classes(K, n, selection_strategy):
         
         seen.sort()
         return seen
+    ###########################################
+    
+    
+    #########closeness#######################
     elif selection_strategy=='closeness_max':
         n_classes = K.shape[0]
         seen = []
@@ -152,6 +184,9 @@ def select_classes(K, n, selection_strategy):
         
         seen.sort()
         return seen
+    ##########################################
+
+    ########information centrality###########
     elif selection_strategy=='information_max':
         n_classes = K.shape[0]
         seen = []
@@ -182,6 +217,8 @@ def select_classes(K, n, selection_strategy):
         
         seen.sort()
         return seen
+    ####################################
+
     elif selection_strategy=='current_flow_closeness_max':
         n_classes = K.shape[0]
         seen = []
@@ -242,6 +279,9 @@ def select_classes(K, n, selection_strategy):
         
         seen.sort()
         return seen
+    ###########################################
+    #       PAGERANK CENTRALITY               #
+    ###########################################
     elif selection_strategy=='pagerank_max':
         n_classes = K.shape[0]
         seen = []
@@ -273,8 +313,23 @@ def select_classes(K, n, selection_strategy):
         seen.sort()
         return seen
 
+    ######################################
+
+
+    #######TOP_N#########################
+    if (selection_strategy=="top_n"):
+        col_sum=one_hot.sum(axis=0)
+        ind = np.argpartition(col_sum, -1*n)
+        seen = []
+        for i in range(1,n+1):
+            seen.append(ind[-1*i])
+        seen.sort()
+        return seen
+
     else:
         print("Error! This selection strategy is not defined.")
+    ###################################
+
 
 def select_classes_baseline(one_hot,n,selection_strategy="top_n"):
     if (selection_strategy=="top_n"):

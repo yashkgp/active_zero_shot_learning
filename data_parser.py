@@ -169,3 +169,4 @@ class DataParser():
                 np.save(target_filename,one_hot)
         else:
             return one_hot
+

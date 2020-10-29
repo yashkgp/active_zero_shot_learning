@@ -1,5 +1,10 @@
 import numpy as np
 
+
+'''
+calculates Precision@5
+'''
+
 def compute_unseen_class_scores(seen_class_scores, K, seen_classes, unseen_classes):
 
     return np.matmul(K[unseen_classes, :][:, seen_classes], seen_class_scores.T).T

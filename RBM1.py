@@ -2,6 +2,13 @@ from __future__ import print_function
 import numpy as np
 import math
 
+
+'''
+script for RBM
+taken from: (TODO: add url)
+'''
+
+
 class RBM:
 
   def __init__(self, num_visible, num_hidden):
@@ -124,14 +131,15 @@ class RBM:
     return samples[:,1:]
 
   def _logistic(self, x):
+    #print(x)
     return 1.0 / (1 + np.exp(-x))
-
-def train_RBM_and_compute_simiarity(class_array,target_filename,reduced_dimension=100,epochs=5000):
+def train_RBM_and_compute_simiarity(class_array,target_filename,reduced_dimension=100,epochs=800):
   #num_tags = 1000    #number of tags
   #reduced_demension = 100 #reduced demension
   #epochs = 5000
   #filename =""    # name of np array containing one hot encoding for classes
   num_tags = class_array.shape[1]
+  #class_array = class_array.astype(int)
   r = RBM(num_visible = num_tags, num_hidden = reduced_dimension)
   training_data = class_array
   r.train(training_data, max_epochs = epochs)

@@ -6,7 +6,7 @@ def logreg_model(train,seen_classes,classes):
 	models = {}
 	for x in seen_classes:
 		print(x)
-		clf = LinearSVC(random_state=0, tol=1e-5)
+		clf = LinearSVC(random_state=0, tol=1e-5,verbose=True)
 		clf = CalibratedClassifierCV(clf,cv=2)
 		Y = classes[:,x]
 		Y.shape = (train.shape[0],1)
