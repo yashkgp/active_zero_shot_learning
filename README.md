@@ -21,8 +21,7 @@ th. The output is generated in data/dbaData/output or data/unixData/output respe
 ## Experiment - 
 
 In order to run the experiment you need to run the command - 
-``` python main.py --data_dir=<data_dir> --start_seen=<start_seen> --end_seen=<end_seen> --plot_file=<plot_file> --measure=
-<centrality_measure>```
+``` python main.py --data_dir=<data_dir> --start_seen=<start_seen> --end_seen=<end_seen> --plot_file=<plot_file> --measure= <centrality_measure>```
 where,
 
 `<data_dir>` - is the directory where data is present. It will be data/dbaData/output or data/unixData/output depending on the subsystem.
